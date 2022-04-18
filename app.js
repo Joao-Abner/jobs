@@ -3,8 +3,8 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const rotaProdutos = require('./routes/produtos');
-const rotaPedidos = require('./routes/pedidos');
+const rotaProdutos = require('./routes/empresas');
+const rotaPedidos = require('./routes/vagas');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false })); // apenas dados simples
@@ -25,8 +25,8 @@ app.use((req, res, next) => {
     next();
 })
 
-app.use('/produtos', rotaProdutos);
-app.use('/pedidos', rotaPedidos);
+app.use('/empresas', rotaEmpresas);
+app.use('/vagas', rotaVagas);
 
 //Erro de Rota
 app.use((req, res, next) => {

@@ -2,19 +2,19 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('../mysql').pool;
 
-// RETORNA TODOS OS PRODUTOS
+// RETORNA TODOS AS EMPRESAS
 router.get('/',(req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'SELECT * FROM produtos;',
+            'SELECT * FROM empresas;',
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
                     quantidade: result.length,
                     produtos: result.map(prod => {
                         return {
-                            id_produtos: prod.id_produtos,
+                            id_empresa: prod.id_empresa,
                             nome: prod.nome,
                             preco: prod.preco,
                             request: {

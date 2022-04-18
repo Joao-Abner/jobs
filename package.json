@@ -1,0 +1,20 @@
+{
+  "name": "jobs-api",
+  "version": "1.0.0",
+  "description": "Painel de vagas de empregos com back-end e front-end API RESTful.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "painel",
+    "vagas",
+    "empregos",
+    "quadro"
+  ],
+  "author": "João Abner Pereira de Almeida",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
+}

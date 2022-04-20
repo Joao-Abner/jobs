@@ -11,16 +11,16 @@ router.get('/',(req, res, next) => {
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    quantidade: result.length,
-                    produtos: result.map(prod => {
+                    total_empresas: result.length,
+                    empresas: result.map(empresa => {
                         return {
-                            id_empresa: prod.id_empresa,
-                            nome: prod.nome,
-                            preco: prod.preco,
+                            id_empresa: empresa.id_empresa,
+                            nome: empresa.nome,
+                            preco: empresa.preco,
                             request: {
                                 tipo: 'GET',
-                                descrição: 'Retorna os detalhes de um produto específico',
-                                url: 'http://localhost:3000/produtos/' + prod.id_produtos
+                                descrição: 'Retorna os detalhes de uma empresa específica',
+                                url: 'http://localhost:3000/empresas/' + empresa.id_empresas
                             }
                         }
                     })
@@ -31,26 +31,25 @@ router.get('/',(req, res, next) => {
     });
 });
 
-// INSERE UM PRODUTO
+// INSERE EMPRESA
 router.post('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'INSERT INTO produtos (nome, preco) VALUES (?,?)',
-            [req.body.nome, req.body.preco],
+            'INSERT INTO empresas (nome) VALUES (?)',
+            [req.body.nome],
             (error, result, field) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    mensagem: 'Produto inserido com sucesso',
-                    produtoCriado: {
-                        id_produtos: result.id_produtos,
+                    mensagem: 'Empresa inserida com sucesso',
+                    EmpresaCriada: {
+                        id_empresa: result.id_empresa,
                         nome: req.body.nome,
-                        preco: req.body.preco,
                         request: {
                             tipo: 'GET',
-                            descricao: 'Retorna todos os produtos',
-                            url: 'http://localhost:3000/produtos'
+                            descricao: 'Retorna todas as empresas',
+                            url: 'http://localhost:3000/empresas'
                         }    
                     }
                 }
@@ -61,30 +60,29 @@ router.post('/', (req, res, next) => {
     
 });
 
-// RETORNA OS DADOS DE UM PRODUTO
-router.get('/:id_produtos', (req, res, next) => {
+// RETORNA OS DADOS DE UMA EMPRESA
+router.get('/:id_empresa', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'SELECT * FROM produtos WHERE id_produtos = ?;',
-            [req.params.id_produtos],
+            'SELECT * FROM empresa WHERE id_empresa = ?;',
+            [req.params.id_empresa],
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
 
                 if (result.length == 0) {
                     return res.status(404).send({
-                        mensagem: 'Não foi encontrado produto com este ID'
+                        mensagem: 'Não foi encontrado empresa com este ID'
                     })
                 }
                 const response = {
-                    produto: {
-                        id_produtos: result[0].id_produtos,
-                        nome: result[0].nome,
-                        preco: result[0].preco,
+                    empresa: {
+                        id_empresa: result[0].id_empresa,
+                        nome: result[0].nome,                        
                         request: {
                             tipo: 'GET',
-                            descricao: 'Retorna todos os produtos',
-                            url: 'http://localhost:3000/produtos'
+                            descricao: 'Retorna todos as empresas',
+                            url: 'http://localhost:3000/empresas'
                         }    
                     }
                 }
@@ -94,33 +92,30 @@ router.get('/:id_produtos', (req, res, next) => {
     });
 });
 
-// ALTERA UM PRODUTO
+// ALTERA EMPRESA
 router.patch('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            `UPDATE produtos
-                SET nome        = ?,
-                    preco       = ?
-               WHERE id_produtos  = ?`,
+            `UPDATE empresas
+                SET nome        = ?                    
+               WHERE id_empresa  = ?`,
             [
                 req.body.nome,
-                req.body.preco,
-                req.body.id_produto
+                req.body.id_empresa
             ],
             (error, result, field) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    mensagem: 'Produto atualizado com sucesso',
-                    produtoCriado: {
-                        id_produtos: result.id_produtos,
+                    mensagem: 'Empresa atualizada com sucesso',
+                    empresaCriado: {
+                        id_empresa: result.id_empresa,
                         nome: req.body.nome,
-                        preco: req.body.preco,
                         request: {
                             tipo: 'GET',
-                            descrição: 'Retorna os detalhes de um produto específico',
-                            url: 'http://localhost:3000/produtos/' + req.body.id_produto
+                            descrição: 'Retorna os detalhes de um empresa específica',
+                            url: 'http://localhost:3000/empresas/' + req.body.id_empresa
                         }
                     }
                 }
@@ -131,24 +126,23 @@ router.patch('/', (req, res, next) => {
     });
 });
 
-// EXCLUI UM PRODUTO
+// EXCLUI EMPRESA
 router.delete('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            `DELETE FROM produtos WHERE id_produtos  = ?`, [req.body.id_produto],
+            `DELETE FROM empresas WHERE id_empresa  = ?`, [req.body.id_empresa],
             (error, result, field) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    mensagem: 'Produto removido com sucesso',
+                    mensagem: 'empresa removido com sucesso',
                     request: {
                         tipo: 'POST',
-                        descricao: 'Insere um produto',
-                        url: 'http://localhost:3000/produtos',
+                        descricao: 'Insere uma empresa',
+                        url: 'http://localhost:3000/empresas',
                         body: {
-                            nome: 'String',
-                            preco: 'Number'
+                            nome: 'String'
                         }
                     }
                 }

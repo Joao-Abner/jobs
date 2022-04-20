@@ -3,8 +3,8 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const rotaProdutos = require('./routes/empresas');
-const rotaPedidos = require('./routes/vagas');
+const rotaEmpresas = require('./routes/empresas');
+const rotaVagas = require('./routes/vagas');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false })); // apenas dados simples

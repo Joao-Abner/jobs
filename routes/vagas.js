@@ -2,34 +2,35 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('../mysql').pool;
 
-// RETORNA TODOS AS VAGAS
+// RETORNA VAGAS
 router.get('/',(req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
-        conn.query(`SELECT pedidos.id_pedido,
-                            pedidos.quantidade,
-                            produtos.id_produtos,
-                            produtos.nome,
-                            produtos.preco
-                        FROM pedidos
-                    INNER JOIN produtos
-                            ON produtos.id_produtos = pedidos.id_produto;`,
+        conn.query(`SELECT vagas.id_vaga,
+                            vagas.salario,
+                            vagas.titulo,
+                            vagas.descrição,
+                            empresas.id_empresas,
+                            empresas.nome                          
+                        FROM vagas
+                    INNER JOIN empresas
+                            ON empresas.id_empresa = vagas.id_empresa;`,
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    pedidos: result.map(pedido => {
+                    vagas: result.map(vaga => {
                         return {
-                            id_pedido: pedido.id_pedido,
-                            quantidade: pedido.quantidade,
-                            produto: {
-                                id_produtos: pedido.id_produtos,
-                                nome: pedido.nome,
-                                preco: pedido.preco
+                            id_vaga: vaga.id_vaga,
+                            titulo: vaga.titulo,
+                            empresa: {
+                                id_empresas: vaga.id_empresa,
+                                titulo: vaga.titulo,
+                                salario: vaga.salario
                             },  
                             request: {
                                 tipo: 'GET',
-                                descrição: 'Retorna os detalhes de um pedido específico',
-                                url: 'http://localhost:3000/pedidos/' + pedido.id_pedido
+                                descrição: 'Retorna os detalhes de uma vaga específica',
+                                url: 'http://localhost:3000/vagas/' + vaga.id_vaga
                             }
                         }
                     })
@@ -39,35 +40,35 @@ router.get('/',(req, res, next) => {
         )
     });
 });
-// INSERE UM PEDIDO
+// INSERE VAGAS
 router.post('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
-        conn.query('SELECT * FROM produtos WHERE id_produtos = ?',
-        [req.body.id_produto],
+        conn.query('SELECT * FROM empresas WHERE id_empresa = ?',
+        [req.body.id_empresa],
         (error, result, field) => {
             if (error) { return res.status(500).send({ error: error }) }
             if (result.length == 0) {
                 return res.status(404).send({
-                    mensagem: 'Produto não encontrado'
+                    mensagem: 'Empresa não encontrada'
                 })
             }
             conn.query(
-                'INSERT INTO pedidos (id_produto, quantidade) VALUES (?,?)',
-                [req.body.id_produto, req.body.quantidade],
+                'INSERT INTO vagas (id_empresa, nome) VALUES (?,?)',
+                [req.body.id_empresa, req.body.nome],
                 (error, result, field) => {
                     conn.release();
                     if (error) { return res.status(500).send({ error: error }) }
                     const response = {
-                        mensagem: 'Pedido inserido com sucesso',
-                        pedidoCriado: {
-                            id_pedido: result.id_pedido,
-                            id_produtos: req.body.id_produto,
-                            quantidade: req.body.quantidade,
+                        mensagem: 'Vaga inserida com sucesso',
+                        vagaCriado: {
+                            id_vaga: result.id_vaga,
+                            id_empresa: req.body.id_empresa,
+                            nome: req.body.nome,
                             request: {
                                 tipo: 'GET',
-                                descricao: 'Retorna todos os pedidos',
-                                url: 'http://localhost:3000/pedidos'
+                                descricao: 'Retorna todas as vagas',
+                                url: 'http://localhost:3000/vagas'
                             }    
                         }
                     }
@@ -78,30 +79,30 @@ router.post('/', (req, res, next) => {
     })
 });
 
-// RETORNA OS DADOS DE UM PEDIDO
-router.get('/:id_pedido', (req, res, next) => {
+// RETORNA OS DADOS DE UMA VAGA
+router.get('/:id_vaga', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'SELECT * FROM pedidos WHERE id_pedido = ?;',
-            [req.params.id_pedido],
+            'SELECT * FROM vagas WHERE id_vaga = ?;',
+            [req.params.id_vaga],
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
 
                 if (result.length == 0) {
                     return res.status(404).send({
-                        mensagem: 'Não foi encontrado pedido com este ID'
+                        mensagem: 'Não foi encontrada vaga com este ID'
                     })
                 }
                 const response = {
-                    pedido: {
-                        id_pedido: result[0].id_pedido,
-                        id_produtos: result[0].id_produto,
-                        quantidade: result[0].quantidade,
+                    vaga : {
+                        id_vaga : result[0].id_vaga ,
+                        id_empresa: result[0].id_empresa,
+                        nome: result[0].nome,
                         request: {
                             tipo: 'GET',
-                            descricao: 'Retorna todos os pedidos',
-                            url: 'http://localhost:3000/pedidos'
+                            descricao: 'Retorna todas as vagas',
+                            url: 'http://localhost:3000/vagas'
                         }    
                     }
                 }
@@ -111,24 +112,24 @@ router.get('/:id_pedido', (req, res, next) => {
     });
 });
 
-// EXCLUI UM PEDIDO
+// EXCLUI VAGA
 router.delete('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            `DELETE FROM pedidos WHERE id_pedido  = ?`, [req.body.id_pedido],
+            `DELETE FROM vagas WHERE id_vaga   = ?`, [req.body.id_vaga],
             (error, result, field) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    mensagem: 'Pedido removido com sucesso',
+                    mensagem: 'Vaga removida com sucesso',
                     request: {
                         tipo: 'POST',
-                        descricao: 'Insere um pedido',
-                        url: 'http://localhost:3000/pedido',
+                        descricao: 'Insere uma vaga ',
+                        url: 'http://localhost:3000/vaga ',
                         body: {
-                            id_produtos: 'Number',
-                            quantidade: 'Number'
+                            id_empresa: 'Number',
+                            nome: 'String'
                         }
                     }
                 }

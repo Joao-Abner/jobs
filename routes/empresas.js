@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('../mysql').pool;
 
-// RETORNA TODOS AS EMPRESAS
+// RETORNA EMPRESAS
 router.get('/',(req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
@@ -60,12 +60,12 @@ router.post('/', (req, res, next) => {
     
 });
 
-// RETORNA OS DADOS DE UMA EMPRESA
+// RETORNA UMA EMPRESA
 router.get('/:id_empresa', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'SELECT * FROM empresa WHERE id_empresa = ?;',
+            'SELECT * FROM empresas WHERE id_empresa = ?;',
             [req.params.id_empresa],
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
@@ -81,7 +81,7 @@ router.get('/:id_empresa', (req, res, next) => {
                         nome: result[0].nome,                        
                         request: {
                             tipo: 'GET',
-                            descricao: 'Retorna todos as empresas',
+                            descricao: 'Retorna todas as empresas',
                             url: 'http://localhost:3000/empresas'
                         }    
                     }
@@ -140,10 +140,7 @@ router.delete('/', (req, res, next) => {
                     request: {
                         tipo: 'POST',
                         descricao: 'Insere uma empresa',
-                        url: 'http://localhost:3000/empresas',
-                        body: {
-                            nome: 'String'
-                        }
+                        url: 'http://localhost:3000/empresas'
                     }
                 }
                 return res.status(202).send(response);

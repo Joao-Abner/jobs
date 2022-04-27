@@ -6,11 +6,11 @@ const mysql = require('../mysql').pool;
 router.get('/',(req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
-        conn.query(`SELECT vagas.id_vaga,
-                            vagas.salario,
+        conn.query(`SELECT vagas.id_vaga,    
                             vagas.titulo,
-                            vagas.descrição,
-                            empresas.id_empresas,
+                            vagas.salario,
+                            vagas.descricao,
+                            empresas.id_empresa,
                             empresas.nome                          
                         FROM vagas
                     INNER JOIN empresas
@@ -23,9 +23,10 @@ router.get('/',(req, res, next) => {
                             id_vaga: vaga.id_vaga,
                             titulo: vaga.titulo,
                             empresa: {
-                                id_empresas: vaga.id_empresa,
+                                id_empresa: vaga.id_empresa,
                                 titulo: vaga.titulo,
-                                salario: vaga.salario
+                                salario: vaga.salario,
+                                descricao: vaga.descricao
                             },  
                             request: {
                                 tipo: 'GET',
@@ -40,7 +41,7 @@ router.get('/',(req, res, next) => {
         )
     });
 });
-// INSERE VAGAS
+// INSERE VAGA
 router.post('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
@@ -54,17 +55,19 @@ router.post('/', (req, res, next) => {
                 })
             }
             conn.query(
-                'INSERT INTO vagas (id_empresa, nome) VALUES (?,?)',
-                [req.body.id_empresa, req.body.nome],
+                'INSERT INTO vagas (id_empresa, titulo, salario, descricao) VALUES (?,?,?,?)',
+                [req.body.id_empresa, req.body.titulo, req.body.salario, req.body.descricao],
                 (error, result, field) => {
                     conn.release();
                     if (error) { return res.status(500).send({ error: error }) }
                     const response = {
                         mensagem: 'Vaga inserida com sucesso',
-                        vagaCriado: {
+                        vagaCriada: {
                             id_vaga: result.id_vaga,
                             id_empresa: req.body.id_empresa,
-                            nome: req.body.nome,
+                            titulo: req.body.titulo,
+                            salario: req.body.salario,
+                            descricao: req.body.descricao,
                             request: {
                                 tipo: 'GET',
                                 descricao: 'Retorna todas as vagas',
@@ -79,12 +82,12 @@ router.post('/', (req, res, next) => {
     })
 });
 
-// RETORNA OS DADOS DE UMA VAGA
+// RETORNA UMA VAGA
 router.get('/:id_vaga', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'SELECT * FROM vagas WHERE id_vaga = ?;',
+            'SELECT * FROM vagas WHERE id_vaga = (?);',
             [req.params.id_vaga],
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
@@ -98,7 +101,9 @@ router.get('/:id_vaga', (req, res, next) => {
                     vaga : {
                         id_vaga : result[0].id_vaga ,
                         id_empresa: result[0].id_empresa,
-                        nome: result[0].nome,
+                        titulo: result[0].titulo,
+                        salario: result[0].salario,
+                        descricao: result[0].descricao,
                         request: {
                             tipo: 'GET',
                             descricao: 'Retorna todas as vagas',
@@ -107,6 +112,46 @@ router.get('/:id_vaga', (req, res, next) => {
                     }
                 }
                 return res.status(200).send(response);
+            }
+        )
+    });
+});
+
+// ALTERA UMA VAGA
+router.patch('/', (req, res, next) => {
+    mysql.getConnection((error, conn) => {
+        if (error) { return res.status(500).send({ error: error }) }
+        conn.query(
+            `UPDATE vagas
+                SET titulo        = (?),
+                    salario     = (?),
+                    descricao   = (?)                    
+               WHERE id_vaga  = (?)`,
+            [
+                req.body.titulo,
+                req.body.salario,
+                req.body.descricao,
+                req.body.id_vaga
+            ],
+            (error, result, field) => {
+                conn.release();
+                if (error) { return res.status(500).send({ error: error }) }
+                const response = {
+                    mensagem: 'Vaga atualizada com sucesso',
+                    vagaCriada: {
+                        id_vaga: result.id_vaga,
+                        titulo: req.body.titulo,
+                        salario: req.body.salario,
+                        descricao: req.body.descricao,
+                        request: {
+                            tipo: 'GET',
+                            descrição: 'Retorna os detalhes de um vaga específica',
+                            url: 'http://localhost:3000/vagas/' + req.body.id_vaga
+                        }
+                    }
+                }
+                return res.status(202).send(response);
+                
             }
         )
     });
@@ -128,8 +173,7 @@ router.delete('/', (req, res, next) => {
                         descricao: 'Insere uma vaga ',
                         url: 'http://localhost:3000/vaga ',
                         body: {
-                            id_empresa: 'Number',
-                            nome: 'String'
+                            id_vaga: 'Number'
                         }
                     }
                 }

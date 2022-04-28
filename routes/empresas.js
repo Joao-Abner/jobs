@@ -72,7 +72,7 @@ router.get('/:id_empresa', (req, res, next) => {
 
                 if (result.length == 0) {
                     return res.status(404).send({
-                        mensagem: 'Não foi encontrado empresa com este ID'
+                        mensagem: 'Não foi encontrada empresa com este ID'
                     })
                 }
                 const response = {
@@ -136,7 +136,7 @@ router.delete('/', (req, res, next) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    mensagem: 'empresa removido com sucesso',
+                    mensagem: 'empresa removida com sucesso',
                     request: {
                         tipo: 'POST',
                         descricao: 'Insere uma empresa',

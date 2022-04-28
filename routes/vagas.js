@@ -18,6 +18,7 @@ router.get('/',(req, res, next) => {
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
+                    total_vagas: result.length,
                     vagas: result.map(vaga => {
                         return {
                             id_vaga: vaga.id_vaga,

@@ -172,7 +172,7 @@ router.delete('/', (req, res, next) => {
                     request: {
                         tipo: 'POST',
                         descricao: 'Insere uma vaga ',
-                        url: 'http://localhost:3000/vaga ',
+                        url: 'http://localhost:3000/vaga',
                         body: {
                             id_vaga: 'Number'
                         }

@@ -25,6 +25,7 @@ app.use((req, res, next) => {
     next();
 })
 
+//Rotas
 app.use('/empresas', rotaEmpresas);
 app.use('/vagas', rotaVagas);
 

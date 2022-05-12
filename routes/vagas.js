@@ -5,7 +5,8 @@ const mysql = require('../mysql').pool;
 // RETORNA VAGAS
 router.get('/',(req, res, next) => {
     mysql.getConnection((error, conn) => {
-        if (error) { return res.status(500).send({ error: error }) }
+        if (error) { console.log(error) 
+            return res.status(500).send({ error: error }) }
         conn.query(`SELECT vagas.id_vaga,    
                             vagas.titulo,
                             vagas.salario,
